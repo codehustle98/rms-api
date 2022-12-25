@@ -13,4 +13,6 @@ public class MessageConstants {
     public static final String TOKEN_EXPIRED = "TOKEN_EXPIRED";
 
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+
+    public static final String BRANCH_ADD_SUCCESS ="Branch added";
 }
