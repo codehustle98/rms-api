@@ -1,5 +1,6 @@
 package com.codehustle.rms.service.impl;
 
+import com.codehustle.rms.entity.Branch;
 import com.codehustle.rms.repository.BranchRepository;
 import com.codehustle.rms.service.BranchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,5 +15,10 @@ public class BranchServiceImpl implements BranchService {
     @Override
     public Long getTotalBranchesCount(Long orgId) {
         return branchRepository.getTotalBranchesCount(orgId);
+    }
+
+    @Override
+    public void addBranch(Branch branch) {
+        branchRepository.save(branch);
     }
 }
