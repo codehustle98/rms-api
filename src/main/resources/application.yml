@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: RMS
+  datasource:
+    url: jdbc:mysql://localhost:3306/rms
+    username: root
+    password: root
+  data:
+    jpa:
+      repositories:
+        enabled: true
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+  main:
+    allow-circular-references: true
+server:
+  port: 8080
+  servlet:
+    context-path: /rms/api/
