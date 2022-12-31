@@ -1,6 +1,7 @@
 package com.codehustle.rms.controller;
 
 import com.codehustle.rms.entity.User;
+import com.codehustle.rms.exceptions.NotFoundException;
 import com.codehustle.rms.exceptions.UnauthorizedException;
 import com.codehustle.rms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "user/")
@@ -34,6 +36,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void refreshUserToken(@RequestBody String refreshToken, HttpServletResponse response) throws UnauthorizedException {
         userService.refreshUserToken(refreshToken,response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() throws NotFoundException {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
 }

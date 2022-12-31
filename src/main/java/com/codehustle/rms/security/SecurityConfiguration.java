@@ -22,14 +22,18 @@ public class SecurityConfiguration {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private AuthEntryPoint authEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf().disable()
-                .exceptionHandling()
-                .and()
                 .addFilter(new AuthenticationFilter(authenticationManager))
                 .addFilterAfter(new AuthorizationFilter(), AuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(authEntryPoint)
+                .and()
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeRequests(auth -> auth

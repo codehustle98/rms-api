@@ -6,22 +6,28 @@ import com.codehustle.rms.entity.Organization;
 import com.codehustle.rms.entity.User;
 import com.codehustle.rms.exceptions.ConflictException;
 import com.codehustle.rms.exceptions.InvalidArgumentsException;
+import com.codehustle.rms.exceptions.NotFoundException;
 import com.codehustle.rms.exceptions.UnauthorizedException;
 import com.codehustle.rms.model.UserModel;
 import com.codehustle.rms.repository.OrganizationRepository;
 import com.codehustle.rms.repository.UserRepository;
 import com.codehustle.rms.security.JwtUtils;
+import com.codehustle.rms.security.SecurityUtils;
 import com.codehustle.rms.service.UserService;
 import com.codehustle.rms.types.UserType;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -73,21 +79,23 @@ public class UserServiceImpl implements UserDetailsService,UserService {
 
     @Override
     public void refreshUserToken(String refreshToken, HttpServletResponse response) throws UnauthorizedException {
-        if(JwtUtils.isTokenValid(refreshToken)){
-            UserDetails userDetails = loadUserByUsername(JwtUtils.getUsernameFromToken(refreshToken));
-            if(userDetails != null){
-                String token = JwtUtils.generateToken(
-                        userDetails.getUsername(),
-                        userDetails.getAuthorities()
-                );
-                String newRefreshToken = JwtUtils.generateRefreshToken(
-                        userDetails.getUsername(),
-                        userDetails.getAuthorities()
-                );
-                response.setHeader(ApplicationConstants.AUTH_HEADER, token);
-                response.setHeader(ApplicationConstants.REFRESH_HEADER,newRefreshToken);
+        try {
+            if (JwtUtils.isTokenValid(refreshToken)) {
+                UserDetails userDetails = loadUserByUsername(JwtUtils.getUsernameFromToken(refreshToken));
+                if (userDetails != null) {
+                    String token = JwtUtils.generateToken(
+                            userDetails.getUsername(),
+                            userDetails.getAuthorities()
+                    );
+                    String newRefreshToken = JwtUtils.generateRefreshToken(
+                            userDetails.getUsername(),
+                            userDetails.getAuthorities()
+                    );
+                    response.setHeader(ApplicationConstants.AUTH_HEADER, token);
+                    response.setHeader(ApplicationConstants.REFRESH_HEADER, newRefreshToken);
+                }
             }
-        }else{
+        }catch (ExpiredJwtException e){
             throw new UnauthorizedException(MessageConstants.SESSION_EXPIRED);
         }
     }
@@ -95,5 +103,13 @@ public class UserServiceImpl implements UserDetailsService,UserService {
     @Override
     public User findUserbyId(Long userId) {
         return userRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<User> getAllUsers() throws NotFoundException {
+        User user = findUserbyId(SecurityUtils.getUserId());
+        if(user == null)
+            throw new NotFoundException(MessageConstants.USER_NOT_FOUND);
+        return userRepository.findAllByOrganizationOrganizationId(user.getOrganization().getOrganizationId(), PageRequest.of(1,10));
     }
 }

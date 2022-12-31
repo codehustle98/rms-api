@@ -62,7 +62,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                logger.info("Invalid Auth token");
                throw new UnauthorizedException(e,HttpStatus.UNAUTHORIZED.getReasonPhrase());
            }catch (ExpiredJwtException e){
-               throw new UnauthorizedException(e, MessageConstants.TOKEN_EXPIRED);
+               throw new UnauthorizedException(MessageConstants.TOKEN_EXPIRED);
            }
        }
         filterChain.doFilter(request,response);
